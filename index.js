@@ -62,9 +62,34 @@ server.get('/api/posts/:id/comments', (req, res) => {
   const comment = req.body;
 })
 
-server.post('/api/posts/:id/comments', (req, res) => {
+server.post('/api/posts/:id/comments', async (req, res) => {
   const { id } = req.params;
-  const comment = req.body;
+  const { text } = req.body;
+
+  const idCheck = await findById(id);
+
+  // Is ID found? No - Return 404,
+  if (!idCheck.length){
+    res.status(404).json({ message: "The post with the specified ID does not exist." });
+  } else {
+
+    // Is comment.text available? No - Return 400, Yes - Return 201
+    if (!text){
+      res.status(400).json({ errorMessage: "Please provide text for the comment." });
+    } else {
+      insertComment({ text, post_id: id })
+        .then(data => {
+          res.status(201).json(data);
+        })
+        .catch(error => {
+          // Default to return 500 for unsuccessful posting
+          res.status(500).json({
+            error: "There was an error while saving the comment to the database",
+            stack: error.stack
+          });
+        });
+    }
+  }
 })
 
 
