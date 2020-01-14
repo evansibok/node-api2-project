@@ -19,6 +19,23 @@ server.get('/api/posts', (req, res) => {
 
 server.post('/api/posts', (req, res) => {
   const content = req.body;
+
+  // Is title || contents available? No - Return 400 error, Yes - Check if the post information is valid
+  if(!content.title || !content.contents){
+    res.status(400).json({ errorMessage: "Please provide title and contents for the post." })
+  } else {
+
+    // Is post information valid? No - Return error, Yes - send 201 with posts
+    insert(content)
+      .then(data => {
+        res.status(201).json(data);
+      })
+      .catch(error => {
+        
+        // Is there error when saving post? Send 500
+        res.status(500).json({ error: "There was an error while saving the post to the database" });
+      });
+  }
 })
 
 server.get('/api/posts/:id', (req, res) => {
