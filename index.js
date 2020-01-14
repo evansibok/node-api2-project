@@ -14,14 +14,20 @@ const port = 5000;
 server.use(express.json());
 
 server.get('/api/posts', (req, res) => {
-  res.status(200).json({ message: 'found' })
+  find()
+    .then(posts => {
+      res.status(200).json(posts);
+    })
+    .catch(error => {
+      res.status(500).json({ error: error.message });
+    });
 })
 
 server.post('/api/posts', (req, res) => {
   const content = req.body;
 
   // Is title || contents available? No - Return 400 error, Yes - Check if the post information is valid
-  if(!content.title || !content.contents){
+  if (!content.title || !content.contents) {
     res.status(400).json({ errorMessage: "Please provide title and contents for the post." })
   } else {
 
@@ -31,7 +37,7 @@ server.post('/api/posts', (req, res) => {
         res.status(201).json(data);
       })
       .catch(error => {
-        
+
         // Is there error when saving post? Send 500
         res.status(500).json({ error: "There was an error while saving the post to the database" });
       });
