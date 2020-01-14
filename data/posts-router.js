@@ -8,7 +8,7 @@ const db = require('./db');
 const router = express.Router();
 
 // GETS
-router.get('/api/posts', (req, res) => {
+router.get('/', (req, res) => {
   db.find()
     .then(posts => {
       res.status(200).json(posts);
@@ -21,7 +21,7 @@ router.get('/api/posts', (req, res) => {
     });
 });
 
-router.get('/api/posts/:id', async (req, res) => {
+router.get('/:id', async (req, res) => {
   const { id } = req.params;
 
   // Is post with ID found? No - Return 404, Yes - Proceed to fetch post
@@ -45,7 +45,7 @@ router.get('/api/posts/:id', async (req, res) => {
 
 });
 
-router.get('/api/posts/:id/comments', async (req, res) => {
+router.get('/:id/comments', async (req, res) => {
   const { id } = req.params;
   const { post_id } = req.body;
 
@@ -69,10 +69,10 @@ router.get('/api/posts/:id/comments', async (req, res) => {
 
 
   // db.findPostComments(postId)
-});
+}); // NOT DONE
 
 // POSTS
-router.post('/api/posts', (req, res) => {
+router.post('/', (req, res) => {
   const content = req.body;
 
   // Is title || contents available? No - Return 400 error, Yes - Check if the post information is valid
@@ -96,7 +96,7 @@ router.post('/api/posts', (req, res) => {
   }
 });
 
-router.post('/api/posts/:id/comments', async (req, res) => {
+router.post('/:id/comments', async (req, res) => {
   const { id } = req.params;
   const { text } = req.body;
 
@@ -127,7 +127,7 @@ router.post('/api/posts/:id/comments', async (req, res) => {
 });
 
 // DELETE
-router.delete('/api/posts/:id', async (req, res) => {
+router.delete('/:id', async (req, res) => {
   const { id } = req.params;
 
   //SOLUTION 1 (No need for Async)
