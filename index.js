@@ -30,9 +30,9 @@ server.get('/api/posts', (req, res) => {
 server.get('/api/posts/:id', async (req, res) => {
   const { id } = req.params;
 
+  // Is post with ID found? No - Return 404, Yes - Proceed to fetch post
   const idCheck = await findById(id);
 
-  // Is post with ID found? No - Return 404, Yes - Proceed to fetch post
   if (!idCheck.length) {
     res.status(404).json({ message: "The post with the specified ID does not exist." })
   } else {
@@ -51,9 +51,30 @@ server.get('/api/posts/:id', async (req, res) => {
 
 })
 
-server.get('/api/posts/:id/comments', (req, res) => {
+server.get('/api/posts/:id/comments', async (req, res) => {
   const { id } = req.params;
-  const comment = req.body;
+  const { post_id } = req.body;
+
+  //Is post with ID found? No - Return 404, Yes - Proceed to get comments
+  const idCheck = await findCommentById(id);
+  if (!idCheck.length) {
+    res.status(404).json({ message: "The post with the specified ID does not exist." });
+  } else {
+    // Is comments found? No - Return 500, Yes - Return comments
+    findPostComments(post_id)
+      .then(comments => {
+        res.status(200).json(comments);
+      })
+      .catch(error => {
+        res.status(500).json({
+          error: "The comments information could not be retrieved.",
+          stack: error.stack,
+        })
+      });
+  }
+
+
+  findPostComments(postId)
 })
 
 // POSTS
@@ -109,8 +130,44 @@ server.post('/api/posts/:id/comments', async (req, res) => {
 })
 
 // DELETE
-server.delete('/api/posts/:id', (req, res) => {
+server.delete('/api/posts/:id', async (req, res) => {
   const { id } = req.params;
+  
+  //SOLUTION 1 (No need for Async)
+
+  // Is post with ID found? No - Return 404, Yes -Delete
+  // remove(id)
+  //   .then(post => {
+  //     if (!post) {
+  //       res.status(404).json({ message: "The post with the specified ID does not exist." });
+  //     } else {
+  //       res.status(202).json({ message: `Post with ID ${id} deleted.` });
+  //     }
+  //   })
+  //   .catch(error => {
+  //     res.status(500).json({
+  //       error: "The post could not be removed",
+  //       stack: error.stack
+  //     })
+  //   })
+  // return 500
+
+  // SOLUTION 2 (Uses Async)
+  const postCheck = await findById(id);
+  if (!postCheck.length) {
+    res.status(404).json({ message: "The post with the specified ID does not exist." });
+  } else {
+    remove(id)
+      .then(post => {
+        res.status(202).json({ message: `Post with ID ${id} deleted.` });
+      })
+      .catch(error => {
+        res.status(500).json({
+          error: "The post could not be removed",
+          stack: error.stack
+        })
+      });
+  }
 })
 
 // PUT
