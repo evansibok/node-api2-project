@@ -132,7 +132,7 @@ server.post('/api/posts/:id/comments', async (req, res) => {
 // DELETE
 server.delete('/api/posts/:id', async (req, res) => {
   const { id } = req.params;
-  
+
   //SOLUTION 1 (No need for Async)
 
   // Is post with ID found? No - Return 404, Yes -Delete
@@ -171,9 +171,34 @@ server.delete('/api/posts/:id', async (req, res) => {
 })
 
 // PUT
-server.put('/api/posts/:id', (req, res) => {
+server.put('/api/posts/:id', async (req, res) => {
   const { id } = req.params;
-  const { replacement } = req.body;
+  const { title, contents } = req.body;
+
+  // Is post with ID found? No - Return 404, Yes - Proceed
+  // Is title || contents missing? Yes - Return 400, No - Proceed
+  // if post is found && new info valid - Return 200
+  // If error return 500
+
+  const postCheck = await findById(id);
+  if (!postCheck.length) {
+    res.status(404).json({ message: "The post with the specified ID does not exist." });
+  } else {
+    if (!title || !contents) {
+      res.status(400).json({ errorMessage: "Please provide title and contents for the post." });
+    } else {
+      update(id, { title, contents })
+        .then(post => {
+          res.status(200).json(post);
+        })
+        .catch(error => {
+          res.status(500).json({
+            error: "The post information could not be modified.",
+            stack: error.stack,
+          });
+        });
+    }
+  }
 })
 
 
