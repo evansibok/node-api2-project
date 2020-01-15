@@ -47,7 +47,6 @@ router.get('/:id', async (req, res) => {
 
 router.get('/:id/comments', async (req, res) => {
   const { id } = req.params;
-  const { post_id } = req.body;
 
   //Is post with ID found? No - Return 404, Yes - Proceed to get comments with post_id
   // db.findPostComments(postId)
