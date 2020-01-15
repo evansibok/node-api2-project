@@ -49,15 +49,15 @@ router.get('/:id/comments', async (req, res) => {
   const { id } = req.params;
   const { post_id } = req.body;
 
-  //Is post with ID found? No - Return 404, Yes - Proceed to get comments
-  // db.findPostComments(postId) vs db.findCommentById(id)
+  //Is post with ID found? No - Return 404, Yes - Proceed to get comments with post_id
+  // db.findPostComments(postId)
 
-  const idCheck = await db.findCommentById(id);
+  const idCheck = await db.findById(id);
   if (!idCheck.length) {
     res.status(404).json({ message: "The post with the specified ID does not exist." });
   } else {
     // Is comments found? No - Return 500, Yes - Return comments
-    db.findPostComments(post_id)
+    db.findPostComments(id)
       .then(comments => {
         res.status(200).json(comments);
       })
@@ -68,8 +68,7 @@ router.get('/:id/comments', async (req, res) => {
         })
       });
   }
-
-}); // NOT DONE
+});
 
 // POSTS
 router.post('/', (req, res) => {
