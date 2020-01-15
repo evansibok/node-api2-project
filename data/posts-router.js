@@ -50,6 +50,8 @@ router.get('/:id/comments', async (req, res) => {
   const { post_id } = req.body;
 
   //Is post with ID found? No - Return 404, Yes - Proceed to get comments
+  // db.findPostComments(postId) vs db.findCommentById(id)
+
   const idCheck = await db.findCommentById(id);
   if (!idCheck.length) {
     res.status(404).json({ message: "The post with the specified ID does not exist." });
@@ -67,8 +69,6 @@ router.get('/:id/comments', async (req, res) => {
       });
   }
 
-
-  // db.findPostComments(postId)
 }); // NOT DONE
 
 // POSTS
@@ -88,7 +88,7 @@ router.post('/', (req, res) => {
       .catch(error => {
 
         // Is there error when saving post? Send 500
-        res.status(500).json({ 
+        res.status(500).json({
           error: "There was an error while saving the post to the database",
           stack: error.stack,
         });
@@ -111,17 +111,16 @@ router.post('/:id/comments', async (req, res) => {
     if (!text) {
       res.status(400).json({ errorMessage: "Please provide text for the comment." });
     } else {
-      db.insertComment({ text, post_id: id })
-        .then(data => {
-          res.status(201).json(data);
-        })
-        .catch(error => {
-          // Default to return 500 for unsuccessful posting
-          res.status(500).json({
-            error: "There was an error while saving the comment to the database",
-            stack: error.stack
-          });
+      try {
+        const replacement = await db.insertComment({ text, post_id: id });
+        const newComment = await db.findCommentById(replacement.id)
+        res.status(201).json(newComment);
+      } catch (error) {
+        res.status(500).json({
+          error: "There was an error while saving the comment to the database",
+          stack: error.stack
         });
+      }
     }
   }
 });
